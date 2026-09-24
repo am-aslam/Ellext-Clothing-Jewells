@@ -7,6 +7,7 @@ import { Header } from '@/components/customer/Header';
 import { MobileNav } from '@/components/customer/MobileNav';
 import { Footer } from '@/components/customer/Footer';
 import { CartDrawer } from '@/components/customer/CartDrawer';
+import { InstallAppPrompt } from '@/components/ui/InstallAppPrompt';
 
 export const metadata: Metadata = {
   title: {
@@ -14,6 +15,13 @@ export const metadata: Metadata = {
     default: 'ELLEXT | Haute Jewellery & Couture Clothing | Ellext Group'
   },
   description: 'Explore handcrafted fine jewels, uncut polki sets, pure silk tailoring, and luxury bridal creations by Ellext Clothing & Jewells.',
+  applicationName: 'Ellext Clothing & Jewells',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Ellext'
+  },
   keywords: ['Ellext', 'Haute Jewellery', 'Luxury Fashion', 'Polki Choker', 'Silk Gown', 'Banarasi Saree', 'Indian Couture'],
   openGraph: {
     title: 'ELLEXT Clothing & Jewells',
@@ -49,10 +57,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Ellext" />
       </head>
       <body>
         <PwaRegister />
@@ -65,6 +69,7 @@ export default function RootLayout({
                   {children}
                 </main>
                 <CartDrawer />
+                <InstallAppPrompt />
                 <MobileNav />
                 <Footer />
               </CartProvider>

@@ -51,17 +51,9 @@ function SuccessContent() {
   }
 
   return (
-    <div className="checkout-success-wrapper" style={{ padding: '60px 24px 120px' }}>
-      <div className="elx-container" style={{ maxWidth: '780px' }}>
-        <div
-          style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-xs)',
-            padding: '48px 36px',
-            textAlign: 'center'
-          }}
-        >
+    <div className="checkout-success-wrapper">
+      <div className="elx-container checkout-success-container">
+        <div className="checkout-success-card">
           {/* Confirmed Icon */}
           <div
             style={{
@@ -80,25 +72,14 @@ function SuccessContent() {
           </div>
 
           <span className="section-sub-label">Acquisition Verified</span>
-          <h1 className="font-serif" style={{ fontSize: '2.5rem', marginTop: '6px', marginBottom: '12px' }}>
+          <h1 className="font-serif checkout-success-title">
             Order Confirmed
           </h1>
           <p style={{ color: 'var(--color-muted)', fontSize: '0.9375rem', maxWidth: '520px', margin: '0 auto 24px' }}>
             Thank you for acquiring from Ellext Clothing & Jewells. Your creations have been allocated to our master atelier.
           </p>
 
-          <div
-            style={{
-              display: 'inline-block',
-              backgroundColor: 'var(--color-bg)',
-              padding: '10px 24px',
-              borderRadius: 'var(--radius-xs)',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              marginBottom: '32px'
-            }}
-          >
+          <div className="checkout-success-order-number">
             Order Number: <span style={{ color: 'var(--color-noir)' }}>{order?.orderNumber || displayOrderNumber || 'Loading reference'}</span>
           </div>
 
@@ -109,18 +90,7 @@ function SuccessContent() {
           )}
 
           {/* Delivery & Timeline Estimate */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '16px',
-              padding: '20px',
-              backgroundColor: 'var(--color-bg)',
-              borderRadius: 'var(--radius-xs)',
-              textAlign: 'left',
-              marginBottom: '32px'
-            }}
-          >
+          <div className="checkout-success-delivery-grid">
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-gold-dark)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
                 <Truck size={15} /> Expected Arrival
@@ -148,14 +118,14 @@ function SuccessContent() {
 
           {/* Items Preview if available */}
           {order && order.items.length > 0 && (
-            <div style={{ textAlign: 'left', borderTop: '1px solid var(--color-border)', paddingTop: '24px', marginBottom: '32px' }}>
+            <div className="checkout-success-items">
               <h2 className="font-serif" style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
                 Allocated Creations ({order.items.length})
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {order.items.map(it => (
-                  <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ position: 'relative', width: '48px', height: '60px', borderRadius: 'var(--radius-xs)', overflow: 'hidden', backgroundColor: '#eee', flexShrink: 0 }}>
+                  <div key={it.id} className="checkout-success-item">
+                    <div className="checkout-success-item-thumb">
                       <Image
                         src={it.product.coverImage || it.product.images[0]}
                         alt={it.product.name}
@@ -163,11 +133,11 @@ function SuccessContent() {
                         style={{ objectFit: 'cover' }}
                       />
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div className="checkout-success-item-copy">
                       <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{it.product.name}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>Qty: {it.quantity}</div>
                     </div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>
+                    <div className="checkout-success-item-price">
                       ₹{(it.unitPrice * it.quantity).toLocaleString('en-IN')}
                     </div>
                   </div>
@@ -181,7 +151,7 @@ function SuccessContent() {
           )}
 
           {/* CTAs */}
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="checkout-success-actions">
             <Link
               href={order?.id || orderId ? `/account/orders/${order?.id || orderId}` : '/account/orders'}
               className="elx-btn elx-btn-primary elx-btn-md"

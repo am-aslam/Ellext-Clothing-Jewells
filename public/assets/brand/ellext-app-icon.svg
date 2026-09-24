@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#122232"/>
+  <text x="256" y="270" text-anchor="middle" fill="#fff9ed" font-family="Georgia,serif" font-size="112" font-weight="600" letter-spacing="-7">ellext</text>
+  <path d="M150 310h212" stroke="#c9a96e" stroke-width="4"/>
+  <text x="256" y="352" text-anchor="middle" fill="#e8dec8" font-family="Arial,sans-serif" font-size="22" letter-spacing="8">CLOTHING &amp; JEWELLS</text>
+</svg>

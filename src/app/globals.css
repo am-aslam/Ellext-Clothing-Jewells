@@ -2174,6 +2174,149 @@ img {
   .shipment-update-heading time { text-align: left; }
 }
 
+/* Order details: keep long references and all detail cards inside the phone viewport. */
+.order-tracking-wrapper { min-width: 0; padding: 48px 0 120px; }
+.order-tracking-container { max-width: 980px; min-width: 0; }
+.order-tracking-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 32px; }
+.order-tracking-heading { min-width: 0; }
+.order-tracking-number { max-width: 100%; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 400; line-height: 1.12; overflow-wrap: anywhere; }
+.order-tracking-date { display: block; margin-top: 8px; color: var(--color-muted); font-size: .8125rem; }
+.order-tracking-status { flex: 0 0 auto; text-align: right; }
+.order-tracking-status-label { display: block; color: var(--color-muted); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
+.order-tracking-status-value { color: var(--color-noir); font-size: 1.25rem; font-weight: 600; overflow-wrap: anywhere; }
+.order-tracking-card { min-width: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-xs); background: #fff; }
+.order-tracking-timeline-card { padding: 36px 32px; margin-bottom: 36px; }
+.order-tracking-info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-bottom: 36px; }
+.order-tracking-info-card { padding: 28px; }
+.order-tracking-customer-name { font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
+.order-tracking-address { margin-top: 4px; color: var(--color-charcoal); font-size: .875rem; line-height: 1.6; overflow-wrap: anywhere; }
+.order-tracking-contact { margin-top: 8px; color: var(--color-muted); font-size: .8125rem; overflow-wrap: anywhere; }
+.order-tracking-payment-line { color: var(--color-charcoal); font-size: .875rem; line-height: 1.5; overflow-wrap: anywhere; }
+.order-tracking-security-note { margin-top: 8px; color: var(--color-muted); font-size: .8125rem; line-height: 1.55; overflow-wrap: anywhere; }
+.order-tracking-items-card { padding: 32px; }
+.order-tracking-item { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border-light); }
+.order-tracking-item-thumb { position: relative; width: 64px; height: 80px; flex: 0 0 64px; overflow: hidden; border-radius: var(--radius-xs); background: var(--color-bg-subtle); }
+.order-tracking-item-copy { min-width: 0; }
+.order-tracking-item-name { font-size: 1.125rem; overflow-wrap: anywhere; }
+.order-tracking-item-meta { margin-top: 2px; color: var(--color-muted); font-size: .8125rem; overflow-wrap: anywhere; }
+.order-tracking-item-price { min-width: 0; font-size: 1rem; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+
+/* Checkout grids must be allowed to shrink below the intrinsic width of their content. */
+.checkout-wrapper, .checkout-wrapper form, .checkout-grid, .checkout-form-steps, .checkout-summary-column,
+.checkout-step-box, .checkout-order-summary-box, .payment-card, .payment-card-left { min-width: 0; }
+.checkout-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); }
+.checkout-step-title { min-width: 0; flex-wrap: wrap; line-height: 1.2; }
+.payment-card-left { flex: 1; align-items: flex-start; }
+.payment-card-left > svg { flex: 0 0 auto; margin-top: 2px; }
+.payment-card-left > div { min-width: 0; overflow-wrap: anywhere; }
+.checkout-step-box input, .checkout-step-box select, .checkout-step-box textarea { width: 100%; max-width: 100%; min-width: 0; }
+.summary-item-info { min-width: 0; overflow-wrap: anywhere; }
+.summary-item-title { overflow-wrap: anywhere; }
+.summary-line { gap: 12px; }
+.summary-line > :last-child { flex: 0 0 auto; text-align: right; }
+
+/* Small, dismissible install invitation; kept above the fixed mobile navigation. */
+.pwa-install-prompt { display: none; }
+
+@media (max-width: 767px) {
+  .order-tracking-wrapper { padding: 28px 0 calc(112px + env(safe-area-inset-bottom)); }
+  .order-tracking-container { padding-left: 16px; padding-right: 16px; }
+  .order-tracking-header { align-items: flex-start; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+  .order-tracking-number { font-size: clamp(1.45rem, 7vw, 2rem); line-height: 1.1; }
+  .order-tracking-status { text-align: left; }
+  .order-tracking-status-value { font-size: 1.05rem; }
+  .order-tracking-timeline-card { padding: 22px 18px; margin-bottom: 20px; }
+  .order-tracking-timeline-card > h2, .order-tracking-items-card > h2 { font-size: 1.3rem !important; line-height: 1.2; overflow-wrap: anywhere; }
+  .order-tracking-info-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; margin-bottom: 20px; }
+  .order-tracking-info-card { padding: 20px 18px; }
+  .order-tracking-items-card { padding: 22px 18px; }
+  .order-tracking-item { grid-template-columns: 56px minmax(0, 1fr); gap: 12px; }
+  .order-tracking-item-thumb { width: 56px; height: 70px; }
+  .order-tracking-item-name { font-size: 1rem; line-height: 1.2; }
+  .order-tracking-item-price { grid-column: 2; justify-self: start; text-align: left; font-size: .9375rem; }
+  .order-tracking-items-card > div[style*="max-width: 320px"] { width: 100%; max-width: none !important; }
+  .checkout-wrapper { padding: 24px 0 40px; }
+  .checkout-wrapper > .elx-container { padding-left: 16px; padding-right: 16px; }
+  .checkout-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .checkout-step-box, .checkout-order-summary-box { padding: 20px 16px; margin-bottom: 16px; }
+  .checkout-step-title { gap: 10px; margin-bottom: 18px; font-size: 1.25rem; }
+  .checkout-step-badge { flex: 0 0 26px; }
+  .payment-card { align-items: flex-start; gap: 10px; padding: 14px 12px; }
+  .payment-card-left { gap: 9px; }
+  .payment-card-left strong, .payment-card-left p { overflow-wrap: anywhere; }
+  .checkout-order-summary-box { position: static; }
+  .summary-items-scroll { max-height: none; }
+  .coupon-input-form { min-width: 0; }
+  .coupon-input { min-width: 0; width: 100%; }
+  .pwa-install-prompt { position: fixed; z-index: 79; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); left: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 560px; margin: 0 auto; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px; background: #fff; box-shadow: 0 8px 28px rgba(18, 34, 50, .18); }
+  .pwa-install-copy { display: flex; min-width: 0; align-items: center; gap: 10px; }
+  .pwa-install-icon { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border-radius: 50%; background: var(--color-bg-subtle); color: var(--color-noir); }
+  .pwa-install-copy strong { display: block; font-size: .78rem; line-height: 1.3; }
+  .pwa-install-copy p { margin-top: 3px; color: var(--color-muted); font-size: .68rem; line-height: 1.35; }
+  .pwa-install-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; }
+  .pwa-install-button, .pwa-install-help-done { min-height: 38px; padding: 0 11px; border-radius: 4px; background: var(--color-noir); color: white; font-size: .68rem; font-weight: 600; white-space: nowrap; }
+  .pwa-install-dismiss, .pwa-install-help-close { display: grid; width: 32px; height: 36px; flex: 0 0 32px; place-items: center; color: var(--color-muted); }
+  .pwa-install-help { position: absolute; right: 0; bottom: calc(100% + 8px); left: 0; padding: 18px; border: 1px solid var(--color-border); border-radius: 10px; background: #fff; box-shadow: 0 8px 28px rgba(18, 34, 50, .18); }
+  .pwa-install-help > strong { display: block; padding-right: 28px; font-size: .9rem; }
+  .pwa-install-help p { margin: 8px 0 14px; color: var(--color-muted); font-size: .78rem; line-height: 1.5; }
+  .pwa-install-help-close { position: absolute; top: 6px; right: 6px; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .checkout-grid { grid-template-columns: minmax(0, 1fr); }
+  .checkout-order-summary-box { position: static; }
+}
+
+.checkout-success-wrapper { min-width: 0; padding: 60px 0 120px; }
+.checkout-success-container { max-width: 780px; min-width: 0; }
+.checkout-success-card { min-width: 0; overflow: hidden; padding: 48px 36px; border: 1px solid var(--color-border); border-radius: var(--radius-xs); background: #fff; text-align: center; }
+.checkout-success-title { margin: 6px 0 12px; font-size: 2.5rem; line-height: 1.1; overflow-wrap: anywhere; }
+.checkout-success-order-number { display: inline-block; max-width: 100%; margin-bottom: 32px; padding: 10px 24px; border-radius: var(--radius-xs); background: var(--color-bg); font-size: .875rem; font-weight: 600; letter-spacing: .08em; overflow-wrap: anywhere; }
+.checkout-success-delivery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 32px; padding: 20px; border-radius: var(--radius-xs); background: var(--color-bg); text-align: left; }
+.checkout-success-delivery-grid > div { min-width: 0; overflow-wrap: anywhere; }
+.checkout-success-items { margin-bottom: 32px; border-top: 1px solid var(--color-border); padding-top: 24px; text-align: left; }
+.checkout-success-item { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-width: 0; }
+.checkout-success-item-thumb { position: relative; width: 48px; height: 60px; overflow: hidden; border-radius: var(--radius-xs); background: #eee; }
+.checkout-success-item-copy { min-width: 0; overflow-wrap: anywhere; }
+.checkout-success-item-price { min-width: 0; font-size: .875rem; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.checkout-success-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; }
+
+.admin-install-prompt { position: fixed; z-index: 1200; right: 20px; bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; width: min(500px, calc(100vw - 32px)); padding: 14px; border: 1px solid rgba(201,169,110,.35); border-radius: 10px; background: #0f131c; color: #f3f4f6; box-shadow: 0 12px 36px rgba(0,0,0,.4); }
+.admin-install-copy { display: flex; min-width: 0; align-items: center; gap: 10px; }
+.admin-install-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 50%; background: rgba(201,169,110,.15); color: #c9a96e; }
+.admin-install-copy strong { display: block; font-size: .8rem; line-height: 1.3; }
+.admin-install-copy p { margin-top: 3px; color: #9ca3af; font-size: .7rem; line-height: 1.4; }
+.admin-install-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; }
+.admin-install-button { min-height: 40px; padding: 0 12px; border-radius: 5px; background: #c9a96e; color: #07090e; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+.admin-install-dismiss, .admin-install-help-close { display: grid; width: 34px; height: 38px; place-items: center; color: #9ca3af; }
+.admin-install-backdrop { position: fixed; z-index: 1400; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(0,0,0,.72); }
+.admin-install-help { position: relative; width: min(440px, 100%); padding: 28px; border: 1px solid rgba(201,169,110,.3); border-radius: 10px; background: #0f131c; color: #f3f4f6; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+.admin-install-help h2 { padding-right: 30px; color: #fff; font-family: var(--font-serif); font-size: 1.5rem; }
+.admin-install-help p { margin: 12px 0 20px; color: #b8c0cb; font-size: .875rem; line-height: 1.65; }
+.admin-install-help-close { position: absolute; top: 10px; right: 10px; }
+
+@media (max-width: 767px) {
+  .admin-install-prompt { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); left: 12px; width: auto; padding: 12px; }
+  .admin-install-copy p { font-size: .66rem; }
+  .admin-install-button { min-height: 38px; padding: 0 10px; font-size: .68rem; }
+  .checkout-success-wrapper { padding: 28px 0 calc(112px + env(safe-area-inset-bottom)); }
+  .checkout-success-container { padding-left: 16px; padding-right: 16px; }
+  .checkout-success-card { padding: 28px 18px; }
+  .checkout-success-title { font-size: clamp(1.8rem, 9vw, 2.25rem); }
+  .checkout-success-order-number { margin-bottom: 22px; padding: 10px 12px; font-size: .75rem; letter-spacing: .035em; }
+  .checkout-success-delivery-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-bottom: 22px; padding: 16px; }
+  .checkout-success-items { margin-bottom: 22px; padding-top: 18px; }
+  .checkout-success-item { grid-template-columns: 44px minmax(0, 1fr); gap: 10px; }
+  .checkout-success-item-thumb { width: 44px; height: 56px; }
+  .checkout-success-item-price { grid-column: 2; justify-self: start; text-align: left; }
+  .checkout-success-actions { flex-direction: column; gap: 10px; }
+  .checkout-success-actions .elx-btn { width: 100%; max-width: 100%; white-space: normal; text-align: center; }
+}
+
+@media (min-width: 768px) {
+  .pwa-install-prompt { display: none !important; }
+}
+
 .timeline-note {
   font-size: 0.8125rem;
   color: var(--color-muted);
@@ -4194,4 +4337,21 @@ img {
     font-size: 0.72rem;
     letter-spacing: 0.055em;
   }
+}
+
+/* Final checkout overrides follow the shared base rules so narrow screens win the cascade. */
+@media (max-width: 767px) {
+  .checkout-wrapper { padding: 24px 0 40px; }
+  .checkout-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .checkout-step-box, .checkout-order-summary-box { padding: 20px 16px; margin-bottom: 16px; }
+  .checkout-step-title { gap: 10px; margin-bottom: 18px; font-size: 1.25rem; }
+  .payment-card { align-items: flex-start; gap: 10px; padding: 14px 12px; }
+  .payment-card-left { align-items: flex-start; gap: 9px; }
+  .checkout-order-summary-box { position: static; }
+  .summary-items-scroll { max-height: none; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .checkout-grid { grid-template-columns: minmax(0, 1fr); }
+  .checkout-order-summary-box { position: static; }
 }

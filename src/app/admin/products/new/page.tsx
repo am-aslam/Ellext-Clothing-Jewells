@@ -588,7 +588,7 @@ export default function NewProductStoryWizard() {
               </div>
 
               {/* Right Info */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="product-wizard-preview-info" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <span style={{ fontSize: '0.6875rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-muted)' }}>
                   {collection} • {category === 'jewells' ? 'Fine Jewells' : 'Couture Clothing'}
                 </span>
@@ -616,7 +616,7 @@ export default function NewProductStoryWizard() {
                   SKU: <strong>{sku}</strong> • Estimated Arrival: 3–5 Business Days
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
+                <div className="product-wizard-preview-actions" style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
                   <button type="button" className="elx-btn elx-btn-primary elx-btn-md" style={{ flex: 1 }}>
                     Add to Bag
                   </button>

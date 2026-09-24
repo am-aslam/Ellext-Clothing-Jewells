@@ -2320,6 +2320,11 @@ img {
   .product-wizard-step-actions { display: grid !important; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 24px !important; }
   .product-wizard-step-actions > * { width: 100%; min-width: 0; justify-content: center; white-space: normal; text-align: center; }
   .product-wizard-preview { grid-template-columns: minmax(0, 1fr) !important; gap: 20px !important; padding: 16px !important; }
+  .product-wizard-preview > div,
+  .product-wizard-preview-info { min-width: 0; }
+  .product-wizard-preview-info { overflow-wrap: anywhere; }
+  .product-wizard-preview-actions { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; width: 100%; }
+  .product-wizard-preview-actions > button { width: 100%; min-width: 0; min-height: 48px; }
   .product-wizard-publish-actions > div { display: grid !important; grid-template-columns: minmax(0, 1fr); gap: 10px !important; }
 }
 

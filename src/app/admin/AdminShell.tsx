@@ -41,6 +41,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [isLoading, isLoginPage, adminToken, router]);
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isMobileMenuOpen]);
+
   if (isLoginPage) {
     return <>{children}</>;
   }
@@ -190,7 +204,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 20px',
-            position: 'relative'
+            position: 'sticky',
+            top: 0,
+            zIndex: 80,
+            flexShrink: 0
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -265,7 +282,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               backgroundColor: 'rgba(0,0,0,0.7)',
               zIndex: 1000,
               backdropFilter: 'blur(4px)',
-              display: 'flex'
+              display: 'flex',
+              overscrollBehavior: 'contain'
             }}
           >
             <div
@@ -273,7 +291,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               style={{
                 width: '80%',
                 maxWidth: '300px',
-                height: '100%',
+                height: '100dvh',
+                minHeight: '100vh',
+                maxHeight: '100%',
+                overflow: 'hidden',
                 backgroundColor: '#0F131C',
                 color: '#FFF',
                 display: 'flex',
@@ -303,7 +324,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </button>
               </div>
 
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, overflowY: 'auto' }}>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minHeight: 0, overflowY: 'auto', overscrollBehavior: 'contain' }}>
                 {navItems.map(item => {
                   const Icon = item.icon;
                   const isActive = item.href === '/admin' ? pathname === '/admin' : pathname?.startsWith(item.href);

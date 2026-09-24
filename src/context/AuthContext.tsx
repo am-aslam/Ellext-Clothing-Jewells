@@ -113,7 +113,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const registerCustomer = async (data: { name: string; email: string; phone?: string; password: string }) => {
     const res = await api.registerCustomer(data);
-    if (!res.token || !res.refreshToken) throw new Error('Your account was created. Verify your email if requested, then sign in.');
+    if (!res.token || !res.refreshToken) {
+      throw new Error('Your account was created, but Supabase did not start a session. To sign in automatically after registration, disable email confirmation in Supabase Auth settings.');
+    }
     setUser(res.user);
     setCustomerToken(res.token);
     localStorage.setItem('ellext_access_token', res.token);

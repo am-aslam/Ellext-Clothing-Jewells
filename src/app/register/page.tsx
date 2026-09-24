@@ -51,8 +51,12 @@ export default function RegisterPage() {
       showToast('Registration successful. Welcome to Ellext.', 'success');
       router.push('/account');
     } catch (err: any) {
-      setError(err?.message || 'Registration failed. Please check your information.');
-      showToast(err?.message || 'Registration error occurred.', 'error');
+      const message = err?.message || 'Registration failed. Please check your information.';
+      const displayMessage = /email rate limit exceeded|over_email_send_rate_limit/i.test(message)
+        ? 'Email verification is temporarily limited for this store. Please wait before trying again. The store owner can raise this limit by configuring custom SMTP in Supabase Auth.'
+        : message;
+      setError(displayMessage);
+      showToast(displayMessage, 'error');
     } finally {
       setLoading(false);
     }

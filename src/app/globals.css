@@ -4029,6 +4029,26 @@ img {
   }
 }
 
+/* Keep the standalone admin surface continuous on mobile and prevent its
+   sticky toolbar from covering form content while the page is scrolled. */
+body:has(.admin-layout),
+#main-content:has(.admin-layout) {
+  background: #0B0E14;
+}
+
+.admin-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (max-width: 767px) {
+  .admin-shell-header {
+    position: relative !important;
+    top: auto !important;
+    z-index: 1 !important;
+  }
+}
+
 @media (min-width: 1024px) {
   .lg-hidden {
     display: none !important;

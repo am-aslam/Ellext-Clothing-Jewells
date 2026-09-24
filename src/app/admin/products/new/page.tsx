@@ -156,9 +156,9 @@ export default function NewProductStoryWizard() {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '80px' }}>
+    <div className="product-wizard-page" style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '80px' }}>
       {/* Top Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
+      <div className="product-wizard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
         <div>
           <span style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#667085' }}>
             Fast Creation Workflow
@@ -168,7 +168,7 @@ export default function NewProductStoryWizard() {
           </h1>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="product-wizard-header-actions" style={{ display: 'flex', gap: '10px' }}>
           <button
             type="button"
             onClick={() => handlePublish('draft')}
@@ -247,7 +247,7 @@ export default function NewProductStoryWizard() {
 
             {/* Uploaded Images Preview Grid with Reorder and Set Cover */}
             <div style={{ marginTop: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div className="product-wizard-gallery-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#101828' }}>
                   Uploaded Gallery ({uploadedImages.length} images)
                 </span>
@@ -308,7 +308,7 @@ export default function NewProductStoryWizard() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '36px' }}>
+            <div className="product-wizard-step-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '36px' }}>
               <Button
                 variant="primary"
                 size="md"
@@ -423,7 +423,7 @@ export default function NewProductStoryWizard() {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '36px' }}>
+            <div className="product-wizard-step-actions" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '36px' }}>
               <Button variant="secondary" size="md" onClick={() => setCurrentStep(1)}>
                 <ArrowLeft size={15} /> Back to Photos
               </Button>
@@ -513,7 +513,7 @@ export default function NewProductStoryWizard() {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '36px' }}>
+            <div className="product-wizard-step-actions" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '36px' }}>
               <Button variant="secondary" size="md" onClick={() => setCurrentStep(2)}>
                 <ArrowLeft size={15} /> Back to Pricing
               </Button>
@@ -543,6 +543,7 @@ export default function NewProductStoryWizard() {
 
             {/* Preview Box Styled Exactly Like PDP */}
             <div
+              className="product-wizard-preview"
               style={{
                 backgroundColor: '#FAF8F5',
                 border: '1px solid var(--color-border)',
@@ -617,7 +618,7 @@ export default function NewProductStoryWizard() {
             </div>
 
             {/* Bottom Final Actions */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '36px' }}>
+            <div className="product-wizard-step-actions product-wizard-publish-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '36px' }}>
               <Button variant="secondary" size="md" onClick={() => setCurrentStep(3)}>
                 <ArrowLeft size={15} /> Edit Variants
               </Button>

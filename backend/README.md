@@ -36,4 +36,6 @@ Checkout accepts only product/variant IDs, quantities, address ID, coupon code, 
 
 Product image records store URLs and storage keys. Large files should be uploaded to Supabase Storage or another object store; PostgreSQL stores metadata only. The existing `npm run assets:import -- <archive>` command can import supplied image assets for catalogue review.
 
+Product uploads use the public Supabase Storage bucket named by `STORAGE_BUCKET` (defaults to `ellext-product-images`). The backend attempts to create/configure the bucket on first upload using its Supabase secret/service-role key. If the Supabase project disallows bucket creation, create a **public** bucket with that name under Supabase Dashboard → Storage, allow JPEG/PNG/WebP/AVIF, and check the backend `SUPABASE_SECRET_KEY` has Storage admin access. The upload endpoint now logs the provider's reason in backend logs and returns a setup-specific message.
+
 Payment success is accepted only through a verified provider webhook. Configure Razorpay-compatible secrets through environment variables; no payment secret is returned by the API.

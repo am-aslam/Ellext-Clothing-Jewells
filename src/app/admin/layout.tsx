@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import AdminShell from './AdminShell';
-import { AdminInstallPrompt } from '@/components/ui/AdminInstallPrompt';
 
 export const metadata: Metadata = {
   title: {
@@ -17,8 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <>
-    <AdminInstallPrompt />
-    <AdminShell>{children}</AdminShell>
-  </>;
+  return <AdminShell>{children}</AdminShell>;
 }

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { AdminOrderNotifications } from '@/components/admin/AdminOrderNotifications';
+import { AdminInstallPrompt } from '@/components/ui/AdminInstallPrompt';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -177,7 +178,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Admin Content Stage */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'clip' }}>
         {/* Top Header */}
         <header
           className="admin-shell-header"
@@ -189,9 +190,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 20px',
-            position: 'sticky',
-            top: 0,
-            zIndex: 40
+            position: 'relative'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -362,9 +361,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
 
         <main className="admin-main-content" style={{ flex: 1, padding: '24px', backgroundColor: '#0B0E14', color: '#F3F4F6' }}>
+          <AdminInstallPrompt />
+          <AdminOrderNotifications />
           {children}
         </main>
-        <AdminOrderNotifications />
       </div>
     </div>
   );

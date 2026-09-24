@@ -2268,14 +2268,12 @@ img {
 }
 
 .admin-push-card {
-  position: fixed;
-  right: max(18px, env(safe-area-inset-right));
-  bottom: max(18px, env(safe-area-inset-bottom));
-  z-index: 60;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 18px;
-  width: min(540px, calc(100vw - 36px));
+  width: min(540px, 100%);
+  margin: 0 0 16px auto;
   padding: 16px 18px;
   color: #f3f4f6;
   background: #111a27;
@@ -2295,7 +2293,7 @@ img {
 @keyframes admin-push-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 600px) {
-  .admin-push-card { right: 10px; bottom: max(10px, env(safe-area-inset-bottom)); left: 10px; width: auto; align-items: stretch; flex-direction: column; gap: 12px; padding: 14px; }
+  .admin-push-card { width: 100%; margin: 0 0 14px; align-items: stretch; flex-direction: column; gap: 12px; padding: 14px; }
   .admin-push-button { width: 100%; min-height: 44px; }
 }
 
@@ -2345,7 +2343,7 @@ img {
 .checkout-success-item-price { min-width: 0; font-size: .875rem; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
 .checkout-success-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; }
 
-.admin-install-prompt { position: fixed; z-index: 1200; right: 20px; bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; width: min(500px, calc(100vw - 32px)); padding: 14px; border: 1px solid rgba(201,169,110,.35); border-radius: 10px; background: #0f131c; color: #f3f4f6; box-shadow: 0 12px 36px rgba(0,0,0,.4); }
+.admin-install-prompt { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 14px; width: min(500px, 100%); margin: 0 0 16px auto; padding: 14px; border: 1px solid rgba(201,169,110,.35); border-radius: 10px; background: #0f131c; color: #f3f4f6; box-shadow: 0 8px 24px rgba(0,0,0,.22); }
 .admin-install-copy { display: flex; min-width: 0; align-items: center; gap: 10px; }
 .admin-install-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 50%; background: rgba(201,169,110,.15); color: #c9a96e; }
 .admin-install-copy strong { display: block; font-size: .8rem; line-height: 1.3; }
@@ -2360,7 +2358,9 @@ img {
 .admin-install-help-close { position: absolute; top: 10px; right: 10px; }
 
 @media (max-width: 767px) {
-  .admin-install-prompt { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); left: 12px; width: auto; padding: 12px; }
+  .admin-install-prompt { width: 100%; margin: 0 0 14px; padding: 12px; }
+  .admin-install-copy { align-items: flex-start; }
+  .admin-install-actions { align-self: center; }
   .admin-install-copy p { font-size: .66rem; }
   .admin-install-button { min-height: 38px; padding: 0 10px; font-size: .68rem; }
   .checkout-success-wrapper { padding: 28px 0 calc(112px + env(safe-area-inset-bottom)); }
@@ -2861,6 +2861,7 @@ img {
 /* Story-Style Product Creation Wizard */
 .story-creator-wrap {
   background-color: #FFFFFF;
+  color: #101828;
   border: 1px solid var(--admin-border);
   border-radius: var(--radius-md);
   padding: 32px;

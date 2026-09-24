@@ -6,12 +6,23 @@ import { ProductCard } from '@/components/customer/ProductCard';
 
 export const revalidate = 0; // Dynamic server rendering for fresh catalog
 
+async function loadHomeData<T>(label: string, load: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await load();
+  } catch (error) {
+    // Keep editorial/home content available during a temporary API outage;
+    // the failure remains visible in server logs for diagnosis.
+    console.error(`[Home] ${label} could not be loaded.`, error);
+    return fallback;
+  }
+}
+
 export default async function HomePage() {
   const [newArrivals, featuredJewells, featuredClothing, activeOffers] = await Promise.all([
-    api.getProducts({ newArrival: true }),
-    api.getProducts({ category: 'jewells', featured: true }),
-    api.getProducts({ category: 'clothing', featured: true }),
-    api.getOffers(true)
+    loadHomeData('new arrivals', () => api.getProducts({ newArrival: true }), []),
+    loadHomeData('featured jewells', () => api.getProducts({ category: 'jewells', featured: true }), []),
+    loadHomeData('featured clothing', () => api.getProducts({ category: 'clothing', featured: true }), []),
+    loadHomeData('active offers', () => api.getOffers(true), [])
   ]);
 
   return (

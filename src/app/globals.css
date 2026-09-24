@@ -3939,3 +3939,259 @@ img {
   color: var(--color-muted);
   margin-bottom: 20px;
 }
+
+/* Customer order history: fluid cards that remain readable on narrow phones. */
+.account-orders-page {
+  padding: 40px 20px 112px;
+}
+
+.account-orders-page > .elx-container {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.account-orders-breadcrumbs {
+  margin-bottom: 24px;
+}
+
+.account-orders-heading {
+  margin-bottom: 32px;
+}
+
+.account-orders-heading h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.account-orders-heading p {
+  color: var(--color-muted);
+  margin-top: 6px;
+}
+
+.account-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.account-order-card {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 22px 24px;
+}
+
+.account-order-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.account-order-identity {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  min-width: 0;
+}
+
+.account-order-number {
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.account-order-date {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.account-order-summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.account-order-total {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.account-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 0;
+}
+
+.account-order-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.account-order-item-image {
+  position: relative;
+  width: 56px;
+  height: 70px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs);
+  background: var(--color-bg-subtle);
+}
+
+.account-order-item-info {
+  min-width: 0;
+}
+
+.account-order-item-name {
+  font-size: 1.0625rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.account-order-item-meta {
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.account-order-item-price {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.account-order-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.account-order-arrival {
+  min-width: 0;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.account-order-arrival strong {
+  color: var(--color-noir);
+}
+
+.account-order-track {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .account-orders-page {
+    padding: 28px 16px 112px;
+  }
+
+  .account-orders-breadcrumbs {
+    margin-bottom: 18px;
+  }
+
+  .account-orders-heading {
+    margin-bottom: 22px;
+  }
+
+  .account-orders-heading p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .account-order-list {
+    gap: 14px;
+  }
+
+  .account-order-card {
+    padding: 16px;
+  }
+
+  .account-order-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding-bottom: 13px;
+  }
+
+  .account-order-identity {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .account-order-date {
+    line-height: 1.4;
+  }
+
+  .account-order-summary {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .account-order-items {
+    padding: 15px 0;
+  }
+
+  .account-order-item {
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px;
+  }
+
+  .account-order-item-image {
+    width: 52px;
+    height: 66px;
+  }
+
+  .account-order-item-name {
+    font-size: 1rem;
+  }
+
+  .account-order-item-price {
+    padding-top: 2px;
+    font-size: 0.8125rem;
+  }
+
+  .account-order-footer {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding-top: 14px;
+  }
+
+  .account-order-arrival {
+    font-size: 0.8125rem;
+  }
+
+  .account-order-track {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.055em;
+  }
+}

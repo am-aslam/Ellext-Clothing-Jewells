@@ -22,7 +22,8 @@ const serviceBackendPath = '/api/backend';
 const isLocalBrowser = typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 const API_BASE_URL = typeof window === 'undefined'
-  ? trimTrailingSlash(process.env.API_INTERNAL_BASE_URL) ||
+  ? trimTrailingSlash(process.env.BACKEND_INTERNAL_URL) ||
+    trimTrailingSlash(process.env.API_INTERNAL_BASE_URL) ||
     trimTrailingSlash(process.env.BACKEND_URL) ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}${serviceBackendPath}` : '') ||
     trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL) || 'http://localhost:4000'

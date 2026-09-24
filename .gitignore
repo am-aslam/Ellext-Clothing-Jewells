@@ -10,6 +10,8 @@ dist-backend/
 .next-audit/
 .next-services-check/
 .next-routing-fix/
+.next-responsive-check/
+.next-home-responsive-check/
 .next-auth-check/
 .next-vercel-check/
 .vercel/

@@ -45,19 +45,19 @@ export default function AccountOrdersPage() {
   };
 
   return (
-    <div className="account-orders-wrapper" style={{ padding: '48px 24px 100px' }}>
+    <div className="account-orders-wrapper account-orders-page">
       <div className="elx-container">
-        <div className="pdp-breadcrumbs" style={{ marginBottom: '24px' }}>
+        <div className="pdp-breadcrumbs account-orders-breadcrumbs">
           <Link href="/account">Account</Link>
           <span>/</span>
           <span style={{ color: 'var(--color-noir)' }}>Order History</span>
         </div>
 
-        <div style={{ marginBottom: '36px' }}>
-          <h1 className="font-serif" style={{ fontSize: '2.5rem', fontWeight: 400 }}>
+        <div className="account-orders-heading">
+          <h1 className="font-serif">
             Order History ({orders.length})
           </h1>
-          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>
+          <p>
             Inspect shipment progress, airway bills, and invoice details.
           </p>
         </div>
@@ -65,61 +65,36 @@ export default function AccountOrdersPage() {
         {loading ? (
           <LoadingState message="Retrieving order ledger..." />
         ) : orders.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="account-order-list">
             {orders.map(order => (
               <div
                 key={order.id}
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-xs)',
-                  padding: '24px 28px'
-                }}
+                className="account-order-card"
               >
                 {/* Header Row */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '12px',
-                    paddingBottom: '16px',
-                    borderBottom: '1px solid var(--color-border-light)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
+                <div className="account-order-header">
+                  <div className="account-order-identity">
+                    <span className="account-order-number">
                       Order #{order.orderNumber}
                     </span>
-                    <span style={{ fontSize: '0.8125rem', color: 'var(--color-muted)' }}>
+                    <span className="account-order-date">
                       Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div className="account-order-summary">
                     {getStatusBadge(order.orderStatus)}
-                    <span style={{ fontSize: '1rem', fontWeight: 600 }}>
+                    <span className="account-order-total">
                       ₹{order.total.toLocaleString('en-IN')}
                     </span>
                   </div>
                 </div>
 
                 {/* Items in order */}
-                <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div className="account-order-items">
                   {order.items.map(it => (
-                    <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <div
-                        style={{
-                          position: 'relative',
-                          width: '56px',
-                          height: '70px',
-                          borderRadius: 'var(--radius-xs)',
-                          overflow: 'hidden',
-                          backgroundColor: 'var(--color-bg-subtle)',
-                          flexShrink: 0
-                        }}
-                      >
+                    <div key={it.id} className="account-order-item">
+                      <div className="account-order-item-image">
                         <Image
                           src={it.product?.coverImage || it.product?.images?.[0] || '/assets/editorial/the-edit.jpg'}
                           alt={it.product?.name || 'Creation'}
@@ -127,15 +102,15 @@ export default function AccountOrdersPage() {
                           style={{ objectFit: 'cover' }}
                         />
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <h4 className="font-serif" style={{ fontSize: '1.0625rem' }}>
+                      <div className="account-order-item-info">
+                        <h4 className="font-serif account-order-item-name">
                           {it.product.name}
                         </h4>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '2px' }}>
+                        <div className="account-order-item-meta">
                           Qty: {it.quantity} {it.selectedSize ? `• Size: ${it.selectedSize}` : ''} {it.selectedVariant ? `• ${it.selectedVariant}` : ''}
                         </div>
                       </div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>
+                      <div className="account-order-item-price">
                         ₹{(it.unitPrice * it.quantity).toLocaleString('en-IN')}
                       </div>
                     </div>
@@ -143,21 +118,13 @@ export default function AccountOrdersPage() {
                 </div>
 
                 {/* Footer Action */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingTop: '16px',
-                    borderTop: '1px solid var(--color-border-light)'
-                  }}
-                >
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>
+                <div className="account-order-footer">
+                  <span className="account-order-arrival">
                     Expected arrival: <strong>{order.expectedDelivery}</strong>
                   </span>
                   <Link
                     href={`/account/orders/${order.id}`}
-                    className="elx-btn elx-btn-primary elx-btn-sm"
+                    className="elx-btn elx-btn-primary elx-btn-sm account-order-track"
                   >
                     Track Shipment Timeline <ArrowRight size={14} />
                   </Link>

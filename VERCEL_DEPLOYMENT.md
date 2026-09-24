@@ -22,7 +22,7 @@ The storefront and Express API deploy as two Vercel Services from this repositor
 
 Configure email, object storage, and payment credentials (`EMAIL_API_KEY`/SMTP, `STORAGE_*`, and `PAYMENT_*`) only when those services are ready. The values in `.env.example` are placeholders, not production secrets.
 
-Vercel Services provides `NEXT_PUBLIC_BACKEND_URL` for browser requests and `BACKEND_URL` for server-side requests. Leave these generated variables alone unless you have a reason to override them. For local development, `NEXT_PUBLIC_API_URL` may point to `http://localhost:4000`; the backend service itself is started with `npm run api:dev`.
+The frontend declares a Vercel Service Binding to the backend. Vercel injects `BACKEND_INTERNAL_URL` for server-side frontend requests; do not add that variable manually. Browser requests use the public `/api/backend` rewrite (or Vercel's generated `NEXT_PUBLIC_BACKEND_URL`). For local development, `NEXT_PUBLIC_API_URL` may point to `http://localhost:4000`; the backend service itself is started with `npm run api:dev`.
 
 ## Local development
 

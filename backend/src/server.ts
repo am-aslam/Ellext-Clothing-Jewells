@@ -13,6 +13,18 @@ import payments from './routes/payments';
 
 export const app = express();
 app.disable('x-powered-by'); app.use(helmet()); app.use(requestId); app.use(cors({ origin: env.FRONTEND_URL.split(',').map(x => x.trim()), credentials: true })); app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
+// Vercel Services routes the original /api/backend path to this service.
+// Normalize that public mount to the API's established /api route prefix.
+app.use((req, _res, next) => {
+  if (req.url === '/api/backend' || req.url.startsWith('/api/backend/')) {
+    const suffix = req.url.slice('/api/backend'.length);
+    const queryIndex = suffix.indexOf('?');
+    const pathname = queryIndex < 0 ? suffix : suffix.slice(0, queryIndex);
+    const search = queryIndex < 0 ? '' : suffix.slice(queryIndex);
+    req.url = `${pathname.startsWith('/api/') || pathname === '/api' ? pathname : `/api${pathname || ''}`}${search}`;
+  }
+  next();
+});
 app.get(['/health', '/api/health'], async (_req,res)=>{try{await query('select 1');res.json({success:true,data:{service:'ellext-api',status:'ok',timestamp:new Date().toISOString()}});}catch{res.status(503).json({success:false,error:{code:'DATABASE_UNAVAILABLE',message:'Service is temporarily unavailable.'}});}});
 app.get('/api/docs',(_req,res)=>res.json({success:true,data:{openapi:'3.0.3',info:{title:'Ellext API',version:'1.0.0'},servers:[{url:'/api'}]}}));
 app.use('/api/payments/webhook', express.raw({ type: 'application/json', limit: '2mb' })); app.use(express.json({ limit: '2mb' }));

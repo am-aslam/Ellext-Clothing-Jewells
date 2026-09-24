@@ -204,6 +204,16 @@ export default function NewProductStoryWizard() {
                 key={s.step}
                 className={`story-step-item ${isCurrent ? 'active' : ''}`}
                 onClick={() => setCurrentStep(s.step)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Step ${s.step}: ${s.label}`}
+                aria-current={isCurrent ? 'step' : undefined}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setCurrentStep(s.step);
+                  }
+                }}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="story-step-num">

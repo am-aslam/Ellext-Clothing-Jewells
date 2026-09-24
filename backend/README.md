@@ -10,6 +10,16 @@ The backend is the authoritative REST API for Ellext Clothing & Jewells. Supabas
 4. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `ADMIN_NAME`, then run `npm run admin:provision` to create a Supabase Auth admin and `SUPER_ADMIN` record.
 5. Start with `npm run api:dev`, or use `npm run api:build && npm run api:start` in production.
 
+## Admin app order push alerts
+
+Push alerts are optional and require the `admin_push_subscriptions` migration. Apply migrations with `npm run supabase:migrate` before enabling notifications. Generate a VAPID key pair once from the backend package (`npx web-push generate-vapid-keys`) and configure these variables on the backend service in Vercel for Production (and Preview too, if needed):
+
+- `VAPID_PUBLIC_KEY`: the generated public key.
+- `VAPID_PRIVATE_KEY`: the generated private key; keep it as a secret and never commit it.
+- `VAPID_SUBJECT`: a contact URI such as `mailto:orders@yourdomain.com`.
+
+After deployment, sign in through the installed `/admin` app and select **Enable order alerts** on each device. Permission is requested only after that user action. A new checkout then sends the order number, customer name, up to three item names and quantities, item-count remainder, total, and payment method. The notification intentionally excludes the delivery address and phone number. Selecting an alert opens that order in the admin app. Each admin/device must opt in separately; push delivery also depends on browser/OS notification settings and network availability.
+
 ## API contract
 
 Responses use `{ success: true, data }` or `{ success: false, error: { code, message } }`. Send Supabase access tokens as `Authorization: Bearer <token>`.

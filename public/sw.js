@@ -45,6 +45,41 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data?.text() || 'A new order has arrived.' };
+  }
+  const target = typeof payload.url === 'string' && payload.url.startsWith('/admin')
+    ? payload.url
+    : '/admin/orders';
+  event.waitUntil(self.registration.showNotification(payload.title || 'New Ellext order', {
+    body: payload.body || 'Open the admin app to review the order.',
+    icon: payload.icon || '/assets/brand/ellext-app-icon.svg',
+    badge: payload.badge || '/assets/brand/ellext-app-icon.svg',
+    tag: payload.tag || 'ellext-new-order',
+    data: { url: target },
+    requireInteraction: true
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const requested = event.notification.data?.url;
+  const target = new URL(typeof requested === 'string' && requested.startsWith('/admin') ? requested : '/admin/orders', self.location.origin);
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (clients) => {
+    for (const client of clients) {
+      if (new URL(client.url).origin === self.location.origin && new URL(client.url).pathname.startsWith('/admin') && 'navigate' in client) {
+        await client.navigate(target.href);
+        return client.focus();
+      }
+    }
+    return self.clients.openWindow(target.href);
+  }));
+});
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);

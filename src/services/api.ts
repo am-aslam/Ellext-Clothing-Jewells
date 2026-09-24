@@ -731,6 +731,24 @@ export const api = {
     return request<Array<{ id: string; name: string; email: string; role: string; status: string; created_at: string }>>('/api/admin/admins');
   },
 
+  async getAdminPushConfig(): Promise<{ enabled: boolean; publicKey: string | null }> {
+    return request<{ enabled: boolean; publicKey: string | null }>('/api/admin/push/config');
+  },
+
+  async saveAdminPushSubscription(subscription: PushSubscriptionJSON): Promise<void> {
+    await request('/api/admin/push/subscriptions', {
+      method: 'POST',
+      body: JSON.stringify({ subscription })
+    });
+  },
+
+  async deleteAdminPushSubscription(endpoint: string): Promise<void> {
+    await request('/api/admin/push/subscriptions', {
+      method: 'DELETE',
+      body: JSON.stringify({ endpoint })
+    });
+  },
+
   async createAdminAccount(data: { name: string; email: string; password: string; role: string }) {
     return request<{ id: string; name: string; email: string; role: string; status: string }>('/api/admin/admins', { method: 'POST', body: JSON.stringify(data) });
   },

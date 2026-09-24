@@ -2267,6 +2267,38 @@ img {
   .checkout-order-summary-box { position: static; }
 }
 
+.admin-push-card {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: min(540px, calc(100vw - 36px));
+  padding: 16px 18px;
+  color: #f3f4f6;
+  background: #111a27;
+  border: 1px solid rgba(201, 169, 110, .38);
+  border-radius: 10px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .32);
+}
+
+.admin-push-copy { display: flex; align-items: flex-start; gap: 12px; min-width: 0; flex: 1; }
+.admin-push-icon { display: grid; place-items: center; flex: 0 0 36px; height: 36px; color: #d7b978; background: rgba(201, 169, 110, .12); border-radius: 50%; }
+.admin-push-copy strong { display: block; margin: 1px 0 4px; font-size: .9rem; }
+.admin-push-copy p { margin: 0; color: #aab2bf; font-size: .76rem; line-height: 1.45; }
+.admin-push-copy .admin-push-message { margin-top: 5px; color: #d7b978; }
+.admin-push-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 14px; color: #101722; font-size: .76rem; font-weight: 700; white-space: nowrap; background: #c9a96e; border: 0; border-radius: 6px; cursor: pointer; }
+.admin-push-button:disabled { cursor: not-allowed; opacity: .6; }
+.admin-push-spinner { animation: admin-push-spin .8s linear infinite; }
+@keyframes admin-push-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .admin-push-card { right: 10px; bottom: max(10px, env(safe-area-inset-bottom)); left: 10px; width: auto; align-items: stretch; flex-direction: column; gap: 12px; padding: 14px; }
+  .admin-push-button { width: 100%; min-height: 44px; }
+}
+
 .checkout-success-wrapper { min-width: 0; padding: 60px 0 120px; }
 .checkout-success-container { max-width: 780px; min-width: 0; }
 .checkout-success-card { min-width: 0; overflow: hidden; padding: 48px 36px; border: 1px solid var(--color-border); border-radius: var(--radius-xs); background: #fff; text-align: center; }

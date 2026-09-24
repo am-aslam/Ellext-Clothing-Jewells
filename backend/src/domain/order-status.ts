@@ -1,0 +1,3 @@
+export type OrderStatus = 'PLACED' | 'CONFIRMED' | 'PACKED' | 'SHIPPED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED' | 'RETURN_REQUESTED' | 'RETURNED' | 'REFUNDED';
+export const validOrderTransitions: Record<OrderStatus, OrderStatus[]> = { PLACED: ['CONFIRMED', 'CANCELLED'], CONFIRMED: ['PACKED', 'CANCELLED'], PACKED: ['SHIPPED'], SHIPPED: ['OUT_FOR_DELIVERY'], OUT_FOR_DELIVERY: ['DELIVERED'], DELIVERED: ['RETURN_REQUESTED'], RETURN_REQUESTED: ['RETURNED'], RETURNED: ['REFUNDED'], CANCELLED: ['REFUNDED'], REFUNDED: [] };
+export function canTransition(from: OrderStatus, to: OrderStatus) { return validOrderTransitions[from]?.includes(to) ?? false; }

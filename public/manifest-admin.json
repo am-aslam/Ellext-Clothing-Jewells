@@ -1,0 +1,19 @@
+{
+  "name": "Ellext Admin Portal",
+  "short_name": "Ellext Admin",
+  "description": "Atelier operations, CRM, catalog & order management",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/assets/brand/ellext-logo.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

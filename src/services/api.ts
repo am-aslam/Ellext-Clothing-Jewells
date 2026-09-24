@@ -1,0 +1,772 @@
+import {
+  Product,
+  Offer,
+  Order,
+  OrderStage,
+  Address,
+  AdminMetrics,
+  CartItem,
+  User,
+  CustomerListItem,
+  CustomerDetail,
+  CouponItem
+} from '@/types';
+import { mockService } from './mockService';
+import { buildOrderTimeline } from '@/utils/orderTimeline';
+
+// Browser requests use the same-origin Next.js proxy; server-rendered requests call the API directly.
+const API_BASE_URL = typeof window === 'undefined'
+  ? process.env.API_INTERNAL_BASE_URL?.replace(/\/$/, '') ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
+    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:4000'
+  : process.env.VERCEL && process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
+    : '';
+type Envelope<T> = { success: boolean; data: T; error?: { code: string; message: string }; pagination?: any };
+
+const numberValue = (value: unknown, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const textValue = (value: unknown, fallback = '') => (value === null || value === undefined ? fallback : String(value));
+
+const parseObject = (value: unknown): any => {
+  if (typeof value !== 'string') return value ?? {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+};
+
+function normalizeAddress(row: any): Address {
+  const value = parseObject(row);
+  return {
+    id: value.id,
+    fullName: textValue(value.fullName ?? value.full_name),
+    phone: textValue(value.phone),
+    email: textValue(value.email),
+    houseBuilding: textValue(value.houseBuilding ?? value.house_building),
+    street: textValue(value.street),
+    area: textValue(value.area),
+    city: textValue(value.city),
+    state: textValue(value.state),
+    pinCode: textValue(value.pinCode ?? value.pin_code),
+    landmark: value.landmark ?? undefined,
+    country: textValue(value.country, 'India'),
+    isDefault: Boolean(value.isDefault ?? value.is_default),
+    label: value.label ?? undefined
+  };
+}
+
+function normalizeProduct(row: any): Product {
+  const value = row ?? {};
+  const inventory = value.inventory ?? {};
+  const rawImages = Array.isArray(value.images) ? value.images : [];
+  const category = textValue(value.category ?? value.category_name, 'clothing').toLowerCase();
+  const fallbackImage = category === 'jewells'
+    ? '/assets/products/jewels/jewel-07.jpeg'
+    : '/assets/products/clothing/clothing-01.jpg';
+  const images = rawImages
+    .map((image: any) => (typeof image === 'string' ? image : textValue(image?.url)))
+    .filter((url: string) => Boolean(url) && !/^(blob:|data:)/i.test(url));
+  if (!images.length) images.push(fallbackImage);
+  const rawVariants = Array.isArray(value.variants) ? value.variants : [];
+  const status = textValue(value.status, 'DRAFT').toLowerCase() as Product['status'];
+  const sellingPrice = numberValue(value.sellingPrice ?? value.price);
+  const originalPrice = numberValue(value.originalPrice ?? value.compareAtPrice ?? value.compare_at_price, sellingPrice);
+
+  return {
+    id: textValue(value.id),
+    slug: textValue(value.slug),
+    name: textValue(value.name, 'Untitled product'),
+    category: category === 'jewells' ? 'jewells' : 'clothing',
+    collection: textValue(value.collection ?? value.collection_name, 'Uncategorized'),
+    shortDescription: textValue(value.shortDescription ?? value.short_description),
+    description: textValue(value.description),
+    sellingPrice,
+    originalPrice,
+    discountPercent: numberValue(value.discountPercent ?? (originalPrice > sellingPrice ? Math.round((1 - sellingPrice / originalPrice) * 100) : 0)),
+    isSale: Boolean(value.isSale ?? originalPrice > sellingPrice),
+    sku: textValue(value.sku),
+    stock: numberValue(value.stock ?? inventory.stock),
+    lowStockThreshold: numberValue(value.lowStockThreshold ?? value.low_stock_threshold ?? inventory.low_stock_threshold),
+    freeShipping: Boolean(value.freeShipping ?? value.free_shipping),
+    images,
+    coverImage: (() => {
+      const cover = textValue(value.coverImage);
+      return cover && !/^(blob:|data:)/i.test(cover) ? cover : images[0];
+    })(),
+    status: ['active', 'draft', 'archived'].includes(status) ? status : 'draft',
+    clothingAttributes: value.clothingAttributes,
+    jewelleryAttributes: value.jewelleryAttributes,
+    variants: rawVariants.map((variant: any) => ({
+      id: textValue(variant.id),
+      sku: textValue(variant.sku),
+      name: textValue(variant.name, 'Default variant'),
+      stock: numberValue(variant.stock ?? variant.inventory?.stock),
+      price: variant.price == null ? undefined : numberValue(variant.price)
+    })),
+    rating: numberValue(value.rating),
+    reviewsCount: numberValue(value.reviewsCount ?? value.reviews_count),
+    tags: Array.isArray(value.tags) ? value.tags : [],
+    featured: Boolean(value.featured),
+    newArrival: Boolean(value.newArrival ?? value.new_arrival),
+    updatedAt: textValue(value.updatedAt ?? value.updated_at, new Date().toISOString())
+  };
+}
+
+function normalizeOffer(row: any): Offer {
+  const value = row ?? {};
+  const type = textValue(value.discountType ?? value.type, 'PERCENTAGE').toLowerCase();
+  return {
+    id: textValue(value.id),
+    code: textValue(value.code ?? value.name),
+    title: textValue(value.title ?? value.name, 'Offer'),
+    description: textValue(value.description),
+    discountType: type === 'fixed' ? 'fixed' : 'percentage',
+    discountValue: numberValue(value.discountValue ?? value.value),
+    minOrderValue: numberValue(value.minOrderValue ?? value.minimum_order ?? value.minimumOrder),
+    applicableTo: textValue(value.applicableTo, 'all').toLowerCase() as Offer['applicableTo'],
+    startDate: textValue(value.startDate ?? value.start_at, new Date().toISOString()),
+    endDate: textValue(value.endDate ?? value.end_at, new Date().toISOString()),
+    usageLimit: value.usageLimit != null || value.usage_limit != null ? numberValue(value.usageLimit ?? value.usage_limit) : undefined,
+    usedCount: numberValue(value.usedCount ?? value.usage_count),
+    isActive: Boolean(value.isActive ?? value.status)
+  };
+}
+
+function normalizeCoupon(row: any): CouponItem {
+  const value = row ?? {};
+  return {
+    id: textValue(value.id),
+    status: textValue(value.status, value.active ? 'ACTIVE' : 'INACTIVE').toUpperCase() as CouponItem['status'],
+    code: textValue(value.code),
+    discountType: textValue(value.discountType ?? value.discount_type, 'PERCENTAGE').toUpperCase() === 'FIXED' ? 'FIXED' : 'PERCENTAGE',
+    discountValue: numberValue(value.discountValue ?? value.discount_value),
+    minimumOrder: numberValue(value.minimumOrder ?? value.minimum_order),
+    maximumDiscount: value.maximumDiscount != null || value.maximum_discount != null ? numberValue(value.maximumDiscount ?? value.maximum_discount) : null,
+    startAt: textValue(value.startAt ?? value.start_at),
+    endAt: textValue(value.endAt ?? value.end_at),
+    usageLimit: value.usageLimit != null || value.usage_limit != null ? numberValue(value.usageLimit ?? value.usage_limit) : null,
+    usedCount: numberValue(value.usedCount ?? value.usage_count),
+    perUserLimit: value.perUserLimit != null || value.per_customer_limit != null ? numberValue(value.perUserLimit ?? value.per_customer_limit) : null,
+    active: textValue(value.status, value.active ? 'ACTIVE' : 'INACTIVE') === 'ACTIVE',
+    categories: value.categories ?? [],
+    products: value.products ?? [],
+    createdAt: value.createdAt ?? value.created_at
+  };
+}
+
+function normalizeOrder(row: any): Order {
+  const value = row ?? {};
+  const address = normalizeAddress(value.shippingAddress ?? value.shipping_address_snapshot ?? {});
+  const rawItems = Array.isArray(value.items) ? value.items : [];
+  const status = textValue(value.orderStatus ?? value.status, 'PLACED').toLowerCase().replace(/ /g, '_') as OrderStage;
+  const paymentStatus = textValue(value.paymentStatus ?? value.payment_status ?? value.payment, 'PENDING').toLowerCase() as Order['paymentStatus'];
+  const paymentMethod = textValue(value.paymentMethod ?? value.payment_method, 'COD').toLowerCase() as Order['paymentMethod'];
+  return {
+    id: textValue(value.id),
+    orderNumber: textValue(value.orderNumber ?? value.order_number),
+    createdAt: textValue(value.createdAt ?? value.created_at, new Date().toISOString()),
+    customer: value.customer ?? {
+      name: textValue(value.customer_name ?? address.fullName, 'Customer'),
+      email: textValue(value.customer_email ?? address.email),
+      phone: textValue(value.customer_phone ?? address.phone)
+    },
+    shippingAddress: address,
+    items: rawItems.map((item: any) => {
+      const rawProduct = item.product ?? {
+        id: item.product_id,
+        name: item.productName ?? item.product_name,
+        sku: item.sku,
+        price: item.price,
+        images: item.image_url ?? item.imageUrl ? [item.image_url ?? item.imageUrl] : []
+      };
+      const product = normalizeProduct(rawProduct);
+      const liveImage = textValue(item.image_url ?? item.imageUrl ?? rawProduct.coverImage ?? product.coverImage);
+      // Order snapshots may outlive a catalogue entry. Never substitute an unrelated category image.
+      if (!(item.image_url ?? item.imageUrl ?? rawProduct.coverImage ?? (Array.isArray(rawProduct.images) && rawProduct.images.length))) {
+        product.images = [];
+        product.coverImage = undefined;
+      } else {
+        product.images = liveImage ? [liveImage] : product.images;
+        product.coverImage = liveImage || product.coverImage;
+      }
+      return {
+        id: textValue(item.id),
+        productId: textValue(item.productId ?? item.product_id),
+        product,
+        quantity: numberValue(item.quantity, 1),
+        unitPrice: numberValue(item.unitPrice ?? item.price),
+        selectedVariant: item.selectedVariant ?? item.variant_id,
+        selectedSize: item.selectedSize,
+        selectedColour: item.selectedColour,
+        selectedMaterial: item.selectedMaterial
+      };
+    }),
+    subtotal: numberValue(value.subtotal),
+    discount: numberValue(value.discount),
+    shippingFee: numberValue(value.shippingFee ?? value.shipping),
+    total: numberValue(value.total),
+    appliedCoupon: value.appliedCoupon ?? value.coupon_code,
+    paymentMethod: ['card', 'upi', 'netbanking', 'cod'].includes(paymentMethod) ? paymentMethod : 'cod',
+    paymentStatus: ['paid', 'pending', 'failed', 'refunded'].includes(paymentStatus) ? paymentStatus : 'pending',
+    orderStatus: ['placed', 'confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'].includes(status) ? status : 'placed',
+    timeline: Array.isArray(value.timeline) && value.timeline.length
+      ? value.timeline
+      : buildOrderTimeline(
+          ['placed', 'confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'].includes(status) ? status : 'placed',
+          textValue(value.createdAt ?? value.created_at)
+        ),
+    expectedDelivery: textValue(value.expectedDelivery ?? value.expected_delivery)
+  };
+}
+
+function normalizeCustomer(row: any): CustomerListItem {
+  const value = row ?? {};
+  const lastOrderAt = value.lastOrder?.createdAt ?? value.last_order_at;
+  return {
+    id: textValue(value.id),
+    name: textValue(value.name, 'Unnamed customer'),
+    email: textValue(value.email),
+    phone: textValue(value.phone, 'Not provided'),
+    status: textValue(value.status, 'ACTIVE').toUpperCase(),
+    createdAt: textValue(value.createdAt ?? value.created_at, new Date().toISOString()),
+    totalOrders: numberValue(value.totalOrders ?? value.total_orders),
+    completedOrders: numberValue(value.completedOrders ?? value.completed_orders),
+    cancelledOrders: numberValue(value.cancelledOrders ?? value.cancelled_orders),
+    returnedOrders: numberValue(value.returnedOrders ?? value.returned_orders),
+    pendingOrders: numberValue(value.pendingOrders ?? value.pending_orders),
+    totalSpent: numberValue(value.totalSpent ?? value.total_spent),
+    averageOrderValue: numberValue(value.averageOrderValue ?? value.average_order_value),
+    lastOrder: lastOrderAt ? {
+      id: textValue(value.lastOrder?.id),
+      orderNumber: textValue(value.lastOrder?.orderNumber ?? value.last_order_number, 'Order'),
+      createdAt: lastOrderAt,
+      total: numberValue(value.lastOrder?.total ?? value.last_order_total),
+      status: textValue(value.lastOrder?.status ?? value.last_order_status, 'PLACED')
+    } : null,
+    wishlistCount: numberValue(value.wishlistCount ?? value.wishlist_count)
+  };
+}
+
+function customerToken() {
+  return typeof window !== 'undefined' ? localStorage.getItem('ellext_access_token') : null;
+}
+
+function adminToken() {
+  return typeof window !== 'undefined' ? localStorage.getItem('ellext_admin_token') : null;
+}
+
+type CustomerRefreshResult =
+  | { status: 'refreshed'; session: { access_token: string; refresh_token: string }; user?: User }
+  | { status: 'invalid' | 'unavailable' };
+
+let customerRefreshInFlight: {
+  refreshToken: string;
+  promise: Promise<CustomerRefreshResult>;
+} | null = null;
+
+function refreshCustomerSession(refreshToken: string): Promise<CustomerRefreshResult> {
+  if (customerRefreshInFlight?.refreshToken === refreshToken) {
+    return customerRefreshInFlight.promise;
+  }
+
+  const promise: Promise<CustomerRefreshResult> = (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        cache: 'no-store',
+        body: JSON.stringify({ refreshToken })
+      });
+      const body: any = await response.json().catch(() => ({}));
+      const session = body?.data?.session;
+      if (response.ok && session?.access_token && session?.refresh_token) {
+        return { status: 'refreshed', session, user: body.data.user };
+      }
+      return { status: response.status === 401 ? 'invalid' : 'unavailable' };
+    } catch {
+      return { status: 'unavailable' };
+    }
+  })();
+
+  const pending = { refreshToken, promise };
+  customerRefreshInFlight = pending;
+  void promise.then(() => {
+    if (customerRefreshInFlight === pending) customerRefreshInFlight = null;
+  });
+  return promise;
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  if (!(typeof FormData !== 'undefined' && init.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const isAdminRoute = path.startsWith('/api/admin') || path.startsWith('/api/auth/admin/');
+  // Customer endpoints must never receive an admin bearer token (or vice versa).
+  const token = isAdminRoute ? adminToken() : customerToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const send = async (requestHeaders: Headers) => {
+    try {
+      return await fetch(`${API_BASE_URL}${path}`, {
+        ...init,
+        headers: requestHeaders,
+        credentials: 'include',
+        cache: 'no-store'
+      });
+    } catch (error) {
+      console.error(`[API] Could not reach ${path}.`, error);
+      throw new TypeError('Ellext could not reach the account service. Please reload and try again.');
+    }
+  };
+
+  const readBody = async (response: Response) => response.json().catch(() => ({} as Envelope<T>));
+  let res = await send(headers);
+  let body: any = await readBody(res);
+  const refreshableCustomerRequest = typeof window !== 'undefined' && !isAdminRoute &&
+    !['/api/auth/login', '/api/auth/register', '/api/auth/refresh'].includes(path) &&
+    !path.startsWith('/api/auth/admin/');
+
+  // Supabase access tokens expire. Use the persisted refresh token to renew
+  // the session once before treating a normal page reload as a sign-out. A
+  // single-flight refresh is essential because Supabase rotates refresh tokens;
+  // concurrent 401s must share one refresh instead of invalidating each other.
+  const refreshToken = refreshableCustomerRequest ? localStorage.getItem('ellext_refresh_token') : null;
+  let refreshTemporarilyUnavailable = false;
+  if (res.status === 401 && refreshToken) {
+    const refreshed = await refreshCustomerSession(refreshToken);
+    const storedRefreshToken = localStorage.getItem('ellext_refresh_token');
+    if (refreshed.status === 'refreshed') {
+      let retryAccessToken = customerToken();
+      // Do not overwrite a newer login/session if it changed while this request
+      // was waiting on a refresh started by another request.
+      if (storedRefreshToken === refreshToken) {
+        retryAccessToken = refreshed.session.access_token;
+        localStorage.setItem('ellext_access_token', refreshed.session.access_token);
+        localStorage.setItem('ellext_refresh_token', refreshed.session.refresh_token);
+        if (refreshed.user) {
+          localStorage.setItem('ellext_customer_user', JSON.stringify(refreshed.user));
+        }
+        window.dispatchEvent(new CustomEvent('ellext:auth-refreshed', {
+          detail: { accessToken: refreshed.session.access_token, user: refreshed.user }
+        }));
+      }
+      if (retryAccessToken) {
+        headers.set('Authorization', `Bearer ${retryAccessToken}`);
+        res = await send(headers);
+        body = await readBody(res);
+      } else {
+        refreshTemporarilyUnavailable = true;
+      }
+    } else if (refreshed.status === 'invalid' && storedRefreshToken === refreshToken) {
+      localStorage.removeItem('ellext_access_token');
+      localStorage.removeItem('ellext_refresh_token');
+      localStorage.removeItem('ellext_customer_user');
+      window.dispatchEvent(new CustomEvent('ellext:auth-invalid', { detail: { scope: 'customer' } }));
+    } else if (refreshed.status === 'invalid' && customerToken()) {
+      // Another request may already have refreshed and rotated the session.
+      headers.set('Authorization', `Bearer ${customerToken()}`);
+      res = await send(headers);
+      body = await readBody(res);
+    } else {
+      // A transient refresh failure must not destroy the customer's session.
+      refreshTemporarilyUnavailable = true;
+    }
+  }
+
+  const authInvalid = res.status === 401 && (
+    body.error?.code === 'AUTH_INVALID' ||
+    body.error?.message?.toLowerCase().includes('invalid authentication token')
+  );
+  if (authInvalid && typeof window !== 'undefined' && !refreshTemporarilyUnavailable) {
+    const scope = isAdminRoute || path.startsWith('/api/auth/admin/') ? 'admin' : 'customer';
+    if (scope === 'admin') {
+      localStorage.removeItem('ellext_admin_token');
+      localStorage.removeItem('ellext_admin_user');
+    } else {
+      localStorage.removeItem('ellext_access_token');
+      localStorage.removeItem('ellext_refresh_token');
+      localStorage.removeItem('ellext_customer_user');
+    }
+    window.dispatchEvent(new CustomEvent('ellext:auth-invalid', { detail: { scope } }));
+  }
+  if (!res.ok || body.success === false) {
+    if (refreshTemporarilyUnavailable && res.status === 401) {
+      throw new Error('We could not verify your sign-in just now. Your order was not submitted; please try again shortly.');
+    }
+    if (authInvalid && refreshableCustomerRequest) {
+      throw new Error('Your sign-in has expired. Please sign in again, then retry your order.');
+    }
+    throw new Error(body.error?.message || `API error: ${res.status}`);
+  }
+  return (body as Envelope<T>).data !== undefined ? (body as Envelope<T>).data : (body as unknown as T);
+}
+
+async function remote<T>(path: string, init: RequestInit, fallback: () => Promise<T>): Promise<T> {
+  try {
+    return await request<T>(path, init);
+  } catch (err: any) {
+    // Only warn if not 401/403 auth errors (which are expected user failures)
+    if (!err?.message?.includes('401') && !err?.message?.includes('403') && !err?.message?.includes('incorrect')) {
+      console.warn(`[Backend API] Request to ${path} failed; checking fallback:`, err?.message);
+    }
+    // If backend is truly unavailable (fetch network error) or returns 404 for mockable endpoints
+    const msg = String(err?.message || '').toLowerCase();
+    const causeCode = String(err?.cause?.code || '').toLowerCase();
+    if (
+      err instanceof TypeError ||
+      msg.includes('fetch') ||
+      msg.includes('network') ||
+      msg.includes('econnrefused') ||
+      msg.includes('404') ||
+      causeCode.includes('econnrefused')
+    ) {
+      return fallback();
+    }
+    throw err;
+  }
+}
+
+export const api = {
+  // --- Products ---
+  async getProducts(filter?: {
+    category?: string;
+    collection?: string;
+    search?: string;
+    status?: string;
+    featured?: boolean;
+    newArrival?: boolean;
+    sort?: string;
+  }): Promise<Product[]> {
+    const q = new URLSearchParams();
+    Object.entries(filter ?? {}).forEach(([k, v]) => v !== undefined && q.set(k, String(v)));
+    return request<any[]>(`/api/products?${q}`).then(list => list.map(normalizeProduct));
+  },
+
+  async getAllProductsForAdmin(): Promise<Product[]> {
+    return request<any[]>('/api/admin/products').then(list => list.map(normalizeProduct));
+  },
+
+  async getProductBySlug(slug: string): Promise<Product | null> {
+    try {
+      const product = await request<any>(`/api/products/${encodeURIComponent(slug)}`);
+      return normalizeProduct(product);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Product not found.') return null;
+      throw error;
+    }
+  },
+
+  async createProduct(productData: Omit<Product, 'id' | 'updatedAt'>): Promise<Product> {
+    const value: any = productData;
+    const payload = {
+      ...value,
+      price: value.price ?? value.sellingPrice,
+      compareAtPrice: value.compareAtPrice ?? value.originalPrice,
+      categoryId: value.categoryId,
+      collectionId: value.collectionId
+    };
+    return request('/api/admin/products', { method: 'POST', body: JSON.stringify(payload) }).then(normalizeProduct);
+  },
+
+  async uploadProductImage(file: File): Promise<{ url: string; storageKey: string }> {
+    const form = new FormData();
+    form.append('image', file);
+    return request('/api/admin/uploads/products', { method: 'POST', body: form });
+  },
+
+  async addProductImage(id: string, image: { url: string; storageKey: string; sortOrder: number; isCover: boolean }) {
+    return request(`/api/admin/products/${id}/images`, {
+      method: 'POST',
+      body: JSON.stringify(image)
+    });
+  },
+
+  async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
+    return remote(`/api/admin/products/${id}`, { method: 'PATCH', body: JSON.stringify(updates) }, () =>
+      mockService.updateProduct(id, updates)
+    ).then(normalizeProduct);
+  },
+
+  async deleteProduct(id: string): Promise<boolean> {
+    await request(`/api/admin/products/${id}`, { method: 'DELETE' });
+    return true;
+  },
+
+  async updateInventory(sku: string, stock: number): Promise<boolean> {
+    await request('/api/admin/inventory/adjust', { method: 'POST', body: JSON.stringify({ sku, stock }) });
+    return true;
+  },
+
+  // --- Offers & Coupons ---
+  async getOffers(activeOnly = true): Promise<Offer[]> {
+    return remote(`/api/offers?activeOnly=${activeOnly}`, {}, () => mockService.getOffers(activeOnly)).then(list => list.map(normalizeOffer));
+  },
+
+  async validateCoupon(code: string, subtotal: number, category?: string) {
+    return remote(
+      '/api/offers/validate',
+      { method: 'POST', body: JSON.stringify({ code, subtotal, category }) },
+      () => mockService.validateCoupon(code, subtotal, category)
+    );
+  },
+
+  async createOffer(offerData: Omit<Offer, 'id' | 'usedCount'>): Promise<Offer> {
+    return remote(
+      '/api/admin/offers',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          name: offerData.title,
+          type: offerData.discountType,
+          value: offerData.discountValue,
+          minimumOrder: offerData.minOrderValue,
+          startAt: offerData.startDate,
+          endAt: offerData.endDate,
+          usageLimit: offerData.usageLimit
+        })
+      },
+      () => mockService.createOffer(offerData)
+    ).then(normalizeOffer);
+  },
+
+  async toggleOfferStatus(id: string, isActive: boolean): Promise<boolean> {
+    return remote(
+      `/api/admin/offers/${id}/${isActive ? 'enable' : 'disable'}`,
+      { method: 'POST' },
+      () => mockService.toggleOfferStatus(id, isActive)
+    ).then(() => true);
+  },
+
+  // --- Admin Coupons ---
+  async getAdminCoupons(): Promise<CouponItem[]> {
+    return request<any[]>('/api/admin/coupons').then(list => list.map(normalizeCoupon));
+  },
+
+  async createAdminCoupon(payload: {
+    code: string;
+    discountType: 'PERCENTAGE' | 'FIXED';
+    discountValue: number;
+    minimumOrder?: number;
+    maximumDiscount?: number | null;
+    startAt: string;
+    endAt: string;
+    usageLimit?: number | null;
+    perUserLimit?: number | null;
+    active?: boolean;
+    categoryIds?: string[];
+    productIds?: string[];
+  }): Promise<CouponItem> {
+    return request('/api/admin/coupons', { method: 'POST', body: JSON.stringify(payload) }).then(normalizeCoupon);
+  },
+
+  async updateAdminCoupon(id: string, payload: Partial<CouponItem>): Promise<CouponItem> {
+    return request(`/api/admin/coupons/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }).then(normalizeCoupon);
+  },
+
+  async deleteAdminCoupon(id: string): Promise<boolean> {
+    await request(`/api/admin/coupons/${id}`, { method: 'DELETE' });
+    return true;
+  },
+
+  // --- Orders ---
+  async getOrders(): Promise<Order[]> {
+    const path = adminToken() ? '/api/admin/orders' : '/api/orders';
+    return remote(path, {}, () => mockService.getOrders()).then(list => list.map(normalizeOrder));
+  },
+
+  async getOrderById(id: string): Promise<Order | null> {
+    const path = adminToken() ? `/api/admin/orders/${id}` : `/api/orders/${id}`;
+    try {
+      const result = await remote<any>(path, {}, () => mockService.getOrderById(id));
+      const order = result ? normalizeOrder(result.order ?? result) : null;
+      if (order?.id || order?.orderNumber) return order;
+    } catch (error) {
+      if (!(error instanceof Error) || !/order not found/i.test(error.message)) throw error;
+    }
+
+    // Some existing orders are reachable in the owner's order list even when
+    // the detail lookup uses an older reference or a stale confirmation link.
+    const orders = await api.getOrders();
+    return orders.find(order => order.id === id || order.orderNumber === id) ?? null;
+  },
+
+  async createOrder(payload: {
+    customer: { name: string; email: string; phone: string };
+    shippingAddress: Address;
+    items: CartItem[];
+    subtotal: number;
+    discount: number;
+    shippingFee: number;
+    total: number;
+    appliedCoupon?: string;
+    paymentMethod: 'card' | 'upi' | 'netbanking' | 'cod';
+  }): Promise<Order> {
+    const response = await request<any>(
+      '/api/checkout',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          items: payload.items.map(i => ({
+            productId: i.productId,
+            variantId: i.product.variants?.find(variant =>
+              variant.name === i.selectedVariant || variant.id === i.selectedVariant || variant.sku === i.selectedVariant
+            )?.id,
+            quantity: i.quantity
+          })),
+          addressId: payload.shippingAddress.id,
+          couponCode: payload.appliedCoupon,
+          paymentMethod: payload.paymentMethod.toUpperCase()
+        })
+      }
+    );
+    return normalizeOrder(response.order ?? response);
+  },
+
+  async updateOrderStatus(orderId: string, stage: OrderStage, note?: string): Promise<Order> {
+    return remote(
+      `/api/admin/orders/${orderId}/status`,
+      { method: 'PATCH', body: JSON.stringify({ status: stage.toUpperCase(), note }) },
+      () => mockService.updateOrderStatus(orderId, stage, note)
+    ).then(normalizeOrder);
+  },
+
+  // --- Addresses ---
+  async getAddresses(): Promise<Address[]> {
+    return remote('/api/addresses', {}, () => mockService.getAddresses()).then(list => list.map(normalizeAddress));
+  },
+
+  async saveAddress(address: Address): Promise<Address> {
+    return request(
+      '/api/addresses',
+      { method: 'POST', body: JSON.stringify(address) }
+    ).then(normalizeAddress);
+  },
+
+  async deleteAddress(id: string): Promise<boolean> {
+    return remote(`/api/addresses/${id}`, { method: 'DELETE' }, () => mockService.deleteAddress(id));
+  },
+
+  // --- Admin Metrics ---
+  async getAdminMetrics(): Promise<AdminMetrics> {
+    return remote('/api/admin/metrics', {}, () => mockService.getAdminMetrics()).then((value: any) => ({
+      todaySales: numberValue(value.todaySales ?? value.today_sales ?? value.revenue),
+      salesGrowth: numberValue(value.salesGrowth ?? value.sales_growth),
+      ordersCount: numberValue(value.ordersCount ?? value.orders),
+      pendingOrdersCount: numberValue(value.pendingOrdersCount ?? value.pending_orders),
+      lowStockCount: numberValue(value.lowStockCount ?? value.low_stock),
+      activeProductsCount: numberValue(value.activeProductsCount ?? value.active_products),
+      customersCount: numberValue(value.customersCount ?? value.customers),
+      recentOrders: value.recentOrders ?? [],
+      recentCustomers: value.recentCustomers ?? []
+    }));
+  },
+
+  // --- Admin Customer CRM ---
+  async getAdminCustomers(params?: { search?: string; status?: string; sort?: string }): Promise<CustomerListItem[]> {
+    const q = new URLSearchParams();
+    if (params?.search) q.set('search', params.search);
+    if (params?.status) q.set('status', params.status);
+    if (params?.sort) q.set('sort', params.sort);
+    return remote(`/api/admin/customers?${q}`, {}, () => mockService.getAdminCustomers(params)).then(list => list.map(normalizeCustomer));
+  },
+
+  async getAdminCustomerById(id: string): Promise<CustomerDetail | null> {
+    return remote(`/api/admin/customers/${id}`, {}, () => mockService.getAdminCustomerById(id)).then((value: any) => {
+      if (!value) return null;
+      const profile = value.profile ?? value.customer ?? {};
+      const metrics = value.analytics ?? value.metrics ?? {};
+      return {
+        profile: {
+          id: textValue(profile.id),
+          name: textValue(profile.name, 'Unnamed customer'),
+          email: textValue(profile.email),
+          phone: profile.phone ?? null,
+          status: textValue(profile.status, 'ACTIVE'),
+          createdAt: textValue(profile.createdAt ?? profile.created_at, new Date().toISOString()),
+          emailVerifiedAt: profile.emailVerifiedAt ?? profile.email_verified_at ?? null
+        },
+        analytics: {
+          totalOrders: numberValue(metrics.totalOrders ?? metrics.total_orders),
+          completedOrders: numberValue(metrics.completedOrders ?? metrics.completed_orders ?? metrics.completed),
+          cancelledOrders: numberValue(metrics.cancelledOrders ?? metrics.cancelled_orders ?? metrics.cancelled),
+          returnedOrders: numberValue(metrics.returnedOrders ?? metrics.returned_orders),
+          pendingOrders: numberValue(metrics.pendingOrders ?? metrics.pending_orders ?? metrics.pending),
+          totalSpent: numberValue(metrics.totalSpent ?? metrics.total_spent),
+          averageOrderValue: numberValue(metrics.averageOrderValue ?? metrics.average_order ?? metrics.average_order_value)
+        },
+        addresses: (value.addresses ?? []).map(normalizeAddress),
+        wishlistCount: numberValue(value.wishlistCount ?? value.wishlist_count),
+        orders: (value.orders ?? []).map(normalizeOrder)
+      } as CustomerDetail;
+    });
+  },
+
+  async getAdmins(): Promise<Array<{ id: string; name: string; email: string; role: string; status: string; created_at: string }>> {
+    return request<Array<{ id: string; name: string; email: string; role: string; status: string; created_at: string }>>('/api/admin/admins');
+  },
+
+  async createAdminAccount(data: { name: string; email: string; password: string; role: string }) {
+    return request<{ id: string; name: string; email: string; role: string; status: string }>('/api/admin/admins', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  async updateAdminAccount(id: string, data: { role?: string; status?: string }) {
+    return request<{ id: string; name: string; email: string; role: string; status: string }>(`/api/admin/admins/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+  },
+
+  async registerInitialAdmin(data: { name: string; email: string; password: string; setupKey: string }) {
+    return request<{ admin: { id: string; name: string; email: string; role: string } }>('/api/auth/admin/register', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  // --- Authentication ---
+  async registerCustomer(data: { name: string; email: string; phone?: string; password: string }): Promise<{ user: User; token: string; refreshToken: string }> {
+    const res = await request<{ user: User; token?: string; session?: { access_token?: string; refresh_token?: string } }>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return { user: res.user, token: res.token ?? res.session?.access_token ?? '', refreshToken: res.session?.refresh_token ?? '' };
+  },
+
+  async loginCustomer(data: { email: string; password: string }): Promise<{ user: User; token: string; refreshToken: string }> {
+    const res = await request<{ user: User; token?: string; session?: { access_token?: string; refresh_token?: string } }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return { user: res.user, token: res.token ?? res.session?.access_token ?? '', refreshToken: res.session?.refresh_token ?? '' };
+  },
+
+  async loginAdmin(data: { email: string; password: string }): Promise<{ admin: { id: string; name: string; email: string; role: string }; token: string }> {
+    const res = await request<{ admin: { id: string; name: string; email: string; role: string }; token?: string; session?: { access_token?: string } }>('/api/auth/admin/login', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return { admin: res.admin, token: res.token ?? res.session?.access_token ?? '' };
+  },
+
+  async getCustomerProfile(): Promise<User> {
+    return request<User>('/api/auth/me');
+  },
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return request<{ message: string }>('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
+  },
+
+  async resetPassword(data: { token: string; password: string }): Promise<{ message: string }> {
+    return request<{ message: string }>('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+};

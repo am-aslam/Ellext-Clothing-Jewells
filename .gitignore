@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+!.env.example
+dist-backend/
+.dist/
+.next/
+.next-build/
+.next-final/
+.next-audit/
+.next-auth-check/
+.next-vercel-check/
+.vercel/
+tsconfig.tsbuildinfo

@@ -1,0 +1,5 @@
+import 'dotenv/config';
+import { supabase, query, closeDatabase } from '../src/db/supabase';
+import { env } from '../src/config/env';
+async function main(){if(!env.ADMIN_EMAIL||!env.ADMIN_PASSWORD)throw new Error('Set ADMIN_EMAIL and ADMIN_PASSWORD before provisioning an admin.');const email=env.ADMIN_EMAIL.toLowerCase();const created=await supabase.auth.admin.createUser({email,password:env.ADMIN_PASSWORD,email_confirm:true,user_metadata:{name:env.ADMIN_NAME}});if(created.error||!created.data.user)throw new Error(created.error?.message??'Could not create Supabase Auth user.');await query('insert into users(id,name,email,status) values($1,$2,$3,\'ACTIVE\') on conflict(id) do update set name=excluded.name,email=excluded.email',[created.data.user.id,env.ADMIN_NAME,email]);await query("insert into admin_users(id,name,email,role,status) values($1,$2,$3,'SUPER_ADMIN','ACTIVE') on conflict(id) do update set role='SUPER_ADMIN',status='ACTIVE',name=excluded.name,email=excluded.email",[created.data.user.id,env.ADMIN_NAME,email]);console.log(`Provisioned admin ${email}.`);}
+main().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>closeDatabase());

@@ -9,6 +9,7 @@ dist-backend/
 .next-final/
 .next-audit/
 .next-services-check/
+.next-routing-fix/
 .next-auth-check/
 .next-vercel-check/
 .vercel/
